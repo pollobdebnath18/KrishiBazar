@@ -9,6 +9,7 @@ import Img2 from "../assets/banner2.jpg";
 import Img3 from "../assets/banner4.jpg";
 // import Img5 from "../assets/banner5.webp";
 import Img4 from "../assets/banner6.webp";
+import Link from "next/link";
 
 const banners: StaticImageData[] = [Img1, Img2, Img3, Img4];
 
@@ -38,13 +39,13 @@ const Banner = () => {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
-            <button className="rounded-xl bg-green-600 px-7 py-3.5 font-semibold text-white transition hover:bg-green-700 cursor-pointer">
+            <Link href="/products" className="rounded-xl bg-green-600 px-7 py-3.5 font-semibold text-white transition hover:bg-green-700 cursor-pointer">
               পণ্য দেখুন
-            </button>
+            </Link>
 
-            <button className="rounded-xl border border-green-600 px-7 py-3.5 font-semibold text-green-700 transition hover:bg-green-600 hover:text-white cursor-pointer">
+            <Link href="/market-prices" className="rounded-xl border border-green-600 px-7 py-3.5 font-semibold text-green-700 transition hover:bg-green-600 hover:text-white cursor-pointer">
               আজকের বাজারদর
-            </button>
+            </Link>
           </div>
 
           {/* Small Stats */}
