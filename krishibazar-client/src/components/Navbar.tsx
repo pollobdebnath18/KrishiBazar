@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  ShoppingBag,
+  User,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { label: "হোম", href: "/" },
@@ -11,9 +20,54 @@ const navLinks = [
   { label: "আমাদের সম্পর্কে", href: "/about" },
 ];
 
+const profileMenu = [
+  { label: "প্রোফাইল", href: "/profile", icon: User },
+  { label: "সেটিংস", href: "/settings", icon: Settings },
+  { label: "ড্যাশবোর্ড", href: "/dashboard", icon: LayoutDashboard },
+];
+
+const roleLabels: Record<string, string> = {
+  admin: "অ্যাডমিন",
+  farmer: "কৃষক",
+  buyer: "ক্রেতা",
+};
+
+function roleLabel(role?: string): string {
+  return role ? roleLabels[role] ?? role : "";
+}
+
 export default function Navbar() {
+  const { user, isAuthenticated, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const cartCount = 0;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    setProfileOpen(false);
+    setMenuOpen(false);
+    logout();
+  };
+
+  const initials = user?.name
+    ?.split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
@@ -46,20 +100,7 @@ export default function Navbar() {
             aria-label="Shopping cart"
             className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-green-50 hover:text-green-700"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.8}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"
-              />
-            </svg>
+            <ShoppingBag className="h-6 w-6" strokeWidth={1.8} />
             {cartCount > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white">
                 {cartCount}
@@ -67,20 +108,87 @@ export default function Navbar() {
             )}
           </Link>
 
-          <div className="hidden items-center gap-2 sm:flex">
-            <Link
-              href="/login"
-              className="rounded-lg border border-green-600 px-4 py-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-50"
+          {isAuthenticated ? (
+            <div
+              ref={profileRef}
+              className="relative "
+              onMouseEnter={() => setProfileOpen(true)}
+              onMouseLeave={() => setProfileOpen(false)}
             >
-              লগইন
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
-            >
-              রেজিস্টার
-            </Link>
-          </div>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={profileOpen}
+                className="flex items-center gap-1.5 rounded-full p-1 transition-colors hover:bg-green-50"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">
+                  {initials}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 text-gray-500 transition-transform ${
+                    profileOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {profileOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full w-56 overflow-hidden rounded-xl border border-gray-200 bg-white py-2 shadow-lg"
+                >
+                  <div className="border-b border-gray-100 px-4 py-3">
+                    <p className="truncate text-sm font-semibold text-gray-900">
+                      {user?.name}{" "}
+                      <span className="font-medium text-green-700">
+                        ({roleLabel(user?.role)})
+                      </span>
+                    </p>
+                    <p className="truncate text-xs text-gray-500">
+                      {user?.email}
+                    </p>
+                  </div>
+
+                  {profileMenu.map(({ label, href, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      role="menuitem"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-green-50 hover:text-green-700"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  ))}
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    লগআউট
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="hidden items-center gap-2 sm:flex">
+              <Link
+                href="/login"
+                className="rounded-lg border border-green-600 px-4 py-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-50"
+              >
+                লগইন
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
+              >
+                রেজিস্টার
+              </Link>
+            </div>
+          )}
 
           <button
             type="button"
@@ -138,22 +246,24 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-            <li className="flex gap-2 pt-2 sm:hidden">
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex-1 rounded-lg border border-green-600 px-4 py-2 text-center text-sm font-medium text-green-700 transition-colors hover:bg-green-50"
-              >
-                লগইন
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setMenuOpen(false)}
-                className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
-              >
-                রেজিস্টার
-              </Link>
-            </li>
+            {!isAuthenticated && (
+              <li className="flex gap-2 pt-2 sm:hidden">
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 rounded-lg border border-green-600 px-4 py-2 text-center text-sm font-medium text-green-700 transition-colors hover:bg-green-50"
+                >
+                  লগইন
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
+                >
+                  রেজিস্টার
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       )}
