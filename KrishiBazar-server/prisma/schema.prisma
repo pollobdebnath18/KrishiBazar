@@ -11,7 +11,7 @@ model User {
   id String @id @default (uuid())
   name String 
   email String @unique
-  mobile String @unique
+  mobile String 
   upazila String
   district String
   password String 
