@@ -6,11 +6,11 @@ import jwt from "jsonwebtoken";
 const router = Router();
 
 // Register a new user
-router.post("/", async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, mobile,upazila , district, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !mobile || !upazila || !district || !password || !role) {
       return res.status(400).json({
         success: false,
         message: "Please provide all the required fields",
@@ -42,6 +42,9 @@ router.post("/", async (req, res) => {
       data: {
         name,
         email,
+        mobile,
+        upazila,
+        district,
         password: hashedPassword,
         role,
       },
@@ -67,6 +70,9 @@ router.post("/", async (req, res) => {
           id: newUser.id,
           name: newUser.name,
           email: newUser.email,
+          mobile: newUser.mobile,
+          upazila: newUser.upazila,
+          district: newUser.district,
           role: newUser.role,
         },
       },
