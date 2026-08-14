@@ -10,17 +10,18 @@ datasource db {
 model User {
   id String @id @default (uuid())
   name String 
-  email String
+  email String @unique
   password String 
+  role Role @default(farmer)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  role Role
 }
 
 enum Role {
-  Admin
-  Farmer
-  Buyer
+  admin
+  farmer
+  buyer
 }
 
 model Product {
