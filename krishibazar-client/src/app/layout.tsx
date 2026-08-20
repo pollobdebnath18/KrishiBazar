@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
@@ -29,7 +28,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <Navbar />
           {children}
         </AuthProvider>
         <ToastContainer></ToastContainer>

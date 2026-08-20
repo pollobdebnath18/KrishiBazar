@@ -1,11 +1,11 @@
 import React from 'react';
 
-const MarketPrices = () => {
+const Cart = () => {
     return (
         <div>
-            
+            cart
         </div>
     );
 };
 
-export default MarketPrices;
+export default Cart;
