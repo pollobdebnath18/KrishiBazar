@@ -88,6 +88,37 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// Get current user (refresh role from DB)
+router.get("/me", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ success: false, message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; role: string };
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, name: true, email: true, mobile: true, upazila: true, district: true, role: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const newToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+
+    return res.status(200).json({
+      success: true,
+      data: { token: newToken, user },
+    });
+  } catch {
+    return res.status(401).json({ success: false, message: "Invalid or expired token" });
+  }
+});
+
 // Login a user
 router.post("/login" , async(req,res)=>{
   try{

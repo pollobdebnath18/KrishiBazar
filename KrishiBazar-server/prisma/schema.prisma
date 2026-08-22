@@ -42,3 +42,20 @@ model Product {
   updatedAt   DateTime @updatedAt
 }
 
+model MarketPrice {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  image         String
+  location      String
+  category      String
+  price         Int
+  previousPrice Int?
+  priceStatus   String
+  quantity      Int
+  unit          String
+  date          DateTime @default(now())
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
