@@ -21,3 +21,7 @@ export async function LoginUser(data: { email: string; password: string }) {
     body: JSON.stringify(data),
   });
 }
+
+export async function FetchMe() {
+  return apiClient("/users/me", { method: "GET" });
+}

@@ -20,6 +20,7 @@ import {
   type ProductStatus,
 } from "@/lib/dashboard/data";
 import { formatPrice } from "@/lib/format";
+import { translateProductTitle } from "@/lib/bangla";
 
 export default function FarmerMyProductsPage() {
   const [products, setProducts] = useState<DashboardProduct[]>(farmerProducts);
@@ -97,7 +98,7 @@ export default function FarmerMyProductsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="truncate text-base font-bold text-gray-900">
-                    {product.title}
+                    {translateProductTitle(product.title)}
                   </h3>
                   <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
                     <MapPin className="h-3.5 w-3.5 text-green-600" />
@@ -123,7 +124,7 @@ export default function FarmerMyProductsPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => toast.info(`${product.title} দেখছেন`)}
+                    onClick={() => toast.info(`${translateProductTitle(product.title)} দেখছেন`)}
                     aria-label="পণ্য দেখুন"
                     className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm transition hover:bg-green-50 hover:text-green-700"
                   >

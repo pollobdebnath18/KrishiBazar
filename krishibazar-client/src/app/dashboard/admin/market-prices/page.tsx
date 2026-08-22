@@ -2,7 +2,7 @@
 
 import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
-import MarketPricesPanel from "@/components/dashboard/MarketPricesPanel";
+import AdminMarketPricesPanel from "@/components/dashboard/AdminMarketPricesPanel";
 
 export default function AdminMarketPricesPage() {
   return (
@@ -15,7 +15,7 @@ export default function AdminMarketPricesPage() {
         title="সব বাজারদর"
         subtitle="সার্ভার থেকে সংগৃহীত সর্বশেষ তথ্য"
       >
-        <MarketPricesPanel />
+        <AdminMarketPricesPanel />
       </SectionCard>
     </>
   );

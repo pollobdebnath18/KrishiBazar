@@ -24,6 +24,7 @@ import {
   marketPriceTrend,
   type ActivityType,
 } from "@/lib/dashboard/data";
+import { translateProductTitle } from "@/lib/bangla";
 
 const activityIcons: Record<ActivityType, LucideIcon> = {
   user: Users,
@@ -157,7 +158,7 @@ export default function AdminDashboardPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-gray-900">
-                      {item.title}
+                      {translateProductTitle(item.title)}
                     </p>
                     <p className="truncate text-xs text-gray-500">
                       {item.detail}

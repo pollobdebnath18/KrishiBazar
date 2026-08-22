@@ -101,11 +101,6 @@ const Banner = () => {
 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black/10 transition group-hover:bg-black/30" />
-
-                {/* Number */}
-                {/* <div className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm font-bold text-green-700">
-                  {index + 1}
-                </div> */}
               </motion.div>
             ))}
           </div>

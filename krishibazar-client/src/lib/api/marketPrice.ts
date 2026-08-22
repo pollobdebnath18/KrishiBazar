@@ -46,3 +46,21 @@ export async function getMarketPrices(
   const queryString = params.toString();
   return apiClient(queryString ? `/marketPrice?${queryString}` : "/marketPrice");
 }
+
+export async function updateMarketPrice(
+  id: string,
+  input: Partial<CreateMarketPriceInput>
+): Promise<MarketPriceResponse> {
+  return apiClient(`/marketPrice/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteMarketPrice(
+  id: string
+): Promise<MarketPriceResponse> {
+  return apiClient(`/marketPrice/${id}`, {
+    method: "DELETE",
+  });
+}

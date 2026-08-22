@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { FetchMe } from "@/lib/api/auth";
 
 export type AuthUser = {
   id: string;
@@ -43,6 +44,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const rawUser = window.localStorage.getItem(USER_KEY);
         if (token && rawUser) {
           setUser(JSON.parse(rawUser));
+
+          // Refresh user data from DB (catches role changes)
+          FetchMe()
+            .then((res) => {
+              const fresh = res.data.user;
+              window.localStorage.setItem(USER_KEY, JSON.stringify(fresh));
+              setUser(fresh);
+            })
+            .catch(() => {
+              // Token invalid/expired — clear storage
+              window.localStorage.removeItem(TOKEN_KEY);
+              window.localStorage.removeItem(USER_KEY);
+              setUser(null);
+            });
         }
       } catch {
         // ignore malformed storage

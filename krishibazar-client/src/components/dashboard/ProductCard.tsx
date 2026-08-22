@@ -7,6 +7,7 @@ import { MapPin, Plus, ShoppingBasket } from "lucide-react";
 import { toast } from "react-toastify";
 import type { DashboardProduct } from "@/lib/dashboard/data";
 import { formatPrice } from "@/lib/format";
+import { translateProductTitle } from "@/lib/bangla";
 
 export default function ProductCard({
   product,
@@ -55,7 +56,7 @@ export default function ProductCard({
       {/* Body */}
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-bold text-gray-900">{product.title}</h3>
+          <h3 className="text-base font-bold text-gray-900">{translateProductTitle(product.title)}</h3>
           <span className="shrink-0 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
             {product.category}
           </span>

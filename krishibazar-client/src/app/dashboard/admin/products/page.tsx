@@ -7,6 +7,7 @@ import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
 import StatCard from "@/components/dashboard/StatCard";
 import { ProductStatusBadge } from "@/components/dashboard/StatusBadge";
+import { translateProductTitle } from "@/lib/bangla";
 import {
   adminDashboardProducts,
   type DashboardProduct,
@@ -91,7 +92,7 @@ export default function AdminProductsPage() {
               >
                 <div>
                   <p className="text-sm font-bold text-gray-900">
-                    {product.title}
+                    {translateProductTitle(product.title)}
                   </p>
                   <p className="flex items-center gap-1 text-xs text-gray-500">
                     <MapPin className="h-3 w-3 text-green-600" />

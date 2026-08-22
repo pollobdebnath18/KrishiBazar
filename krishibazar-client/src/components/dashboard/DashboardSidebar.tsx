@@ -51,7 +51,7 @@ function SidebarContent({
   };
 
   return (
-    <div className="flex h-full flex-col border-r border-white/10 bg-gray-950 text-white">
+    <div className="flex h-full flex-col border-r border-white/20 bg-gray-950 text-white">
       {/* Brand */}
       <div className="flex items-center gap-3 px-5 pb-5 pt-6 sm:px-6">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-700">
@@ -188,7 +188,7 @@ export default function DashboardSidebar({
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden shrink-0 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[24rem]  lg:overflow-hidden xl:w-[28rem]">
+      <aside className="hidden shrink-0 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[25%] lg:overflow-hidden">
         <SidebarContent role={role} />
       </aside>
 

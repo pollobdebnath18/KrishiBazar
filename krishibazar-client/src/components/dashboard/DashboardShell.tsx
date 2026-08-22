@@ -73,7 +73,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 px-4 py-6 sm:px-5 lg:py-8 lg:pl-0 lg:pr-4">
+        <main className="flex-1 px-4 py-6 sm:px-5 lg:py-8 lg:pl-1 lg:pr-3">
           <div className="w-full">
             <PageTransition>{children}</PageTransition>
           </div>

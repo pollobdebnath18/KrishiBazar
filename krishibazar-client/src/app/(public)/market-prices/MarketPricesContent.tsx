@@ -129,7 +129,7 @@ export default function MarketPricesContent({
 
   return (
     <section className="min-h-screen bg-[#f5f8f2] py-10 sm:py-14">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
