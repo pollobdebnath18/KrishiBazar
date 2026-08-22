@@ -5,6 +5,48 @@ import jwt from "jsonwebtoken";
 
 const router = Router();
 
+// Get all users (admin)
+router.get("/", async (req, res) => {
+  try {
+    const { role } = req.query;
+
+    const where: Record<string, string> = {};
+    if (typeof role === "string" && role.trim()) {
+      where.role = role.trim();
+    }
+
+    const users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        mobile: true,
+        upazila: true,
+        district: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: users.map((u) => ({
+        ...u,
+        status: "ACTIVE",
+        joinedAt: u.createdAt.toISOString().split("T")[0],
+      })),
+    });
+  } catch (err) {
+    console.error("GET USERS ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 // Register a new user
 router.post("/register", async (req, res) => {
   try {
@@ -189,5 +231,34 @@ router.post("/login" , async(req,res)=>{
     })
   }
 })
+
+// Delete a user (admin)
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({ success: false, message: "Cannot delete admin" });
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    console.error("DELETE USER ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
 
 export default router;
