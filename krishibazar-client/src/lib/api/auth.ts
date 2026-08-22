@@ -25,3 +25,12 @@ export async function LoginUser(data: { email: string; password: string }) {
 export async function FetchMe() {
   return apiClient("/users/me", { method: "GET" });
 }
+
+export async function GetUsers(role?: string) {
+  const params = role ? `?role=${role}` : "";
+  return apiClient(`/users${params}`, { method: "GET" });
+}
+
+export async function DeleteUser(id: string) {
+  return apiClient(`/users/${id}`, { method: "DELETE" });
+}

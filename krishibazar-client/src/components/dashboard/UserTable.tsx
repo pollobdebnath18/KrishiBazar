@@ -47,13 +47,15 @@ export default function UserTable({
   return (
     <div className="-mx-5 sm:-mx-6">
       {/* Header (desktop) */}
-      <div className="hidden grid-cols-[1.6fr_1fr_1fr_1fr_0.8fr_auto] gap-4 border-b border-gray-200 px-6 pb-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 lg:grid">
+      <div className="hidden grid-cols-[0.5fr_1.6fr_1fr_1fr_0.8fr_0.8fr_auto] gap-4 border-b border-gray-200 px-6 pb-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 lg:grid">
+        <span>নং</span>
         <span>ব্যবহারকারী</span>
-        <span>ভূমিকা</span>
+        {showRole && <span>ভূমিকা</span>}
+        {!showRole && <span>মোবাইল</span>}
         <span>অবস্থান</span>
         <span>যোগদান</span>
         <span>স্ট্যাটাস</span>
-        <span />
+        <span className="text-right">কার্যক্রম</span>
       </div>
 
       <div className="divide-y divide-gray-100">
@@ -63,9 +65,16 @@ export default function UserTable({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: index * 0.04 }}
-            className="grid grid-cols-1 gap-3 px-5 py-4 sm:px-6 lg:grid-cols-[1.6fr_1fr_1fr_1fr_0.8fr_auto] lg:items-center lg:gap-4"
+            className="grid grid-cols-1 gap-3 px-5 py-4 sm:px-6 lg:grid-cols-[0.5fr_1.6fr_1fr_1fr_0.8fr_0.8fr_auto] lg:items-center lg:gap-4"
           >
+            <span className="hidden text-sm font-bold text-gray-500 lg:flex">
+              {index + 1}
+            </span>
+
             <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700 lg:hidden">
+                {index + 1}
+              </span>
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-sm font-bold text-white">
                 {item.name
                   .split(" ")
@@ -110,7 +119,9 @@ export default function UserTable({
               <UserStatusBadge status={item.status} />
             </div>
 
-            {action && <div className="flex justify-end">{action(item)}</div>}
+            {action && (
+              <div className="flex justify-end">{action(item)}</div>
+            )}
           </motion.div>
         ))}
       </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Sprout, X } from "lucide-react";
+import { ArrowRightFromLine, LogOut, LucideLogOut, Sprout, X } from "lucide-react";
 import ConfirmDialog from "@/components/dashboard/ConfirmDialog";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -16,6 +16,7 @@ import {
   type DashboardRole,
   type NavItem,
 } from "@/lib/dashboard/navigation";
+import { LuLogOut } from "react-icons/lu";
 
 interface DashboardSidebarProps {
   role: DashboardRole;
@@ -112,11 +113,11 @@ function SidebarContent({
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
-          className="group flex w-full items-center gap-3 rounded-xl border border-red-400/30 bg-red-500/15 px-3 py-2.5 text-sm font-semibold text-red-300 transition-colors hover:bg-red-600 hover:text-white"
+          className="group flex w-full items-center gap-1 rounded-xl border border-red-400/30 bg-red-500/15 px-3 py-2.5 text-sm font-semibold text-red-300 transition-colors hover:bg-red-600 hover:text-white"
         >
           <LogOut className="h-[18px] w-[18px] shrink-0" />
           <span className="truncate">{logoutNavItem.label}</span>
-          <span className="ml-auto h-2 w-2 rounded-full bg-red-400 transition-colors group-hover:bg-white" />
+          <LuLogOut className="ml-auto h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
         </button>
       </div>
 

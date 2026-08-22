@@ -1,39 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Package, Tractor, UserCheck } from "lucide-react";
 import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
 import StatCard from "@/components/dashboard/StatCard";
-import UserTable from "@/components/dashboard/UserTable";
-import {
-  dashboardUsers,
-  type DashboardUser,
-  type UserStatus,
-} from "@/lib/dashboard/data";
+import AdminUserListPanel from "@/components/dashboard/AdminUserListPanel";
+import ConfirmDialog from "@/components/dashboard/ConfirmDialog";
+import { DeleteUser, GetUsers } from "@/lib/api/auth";
+import type { DashboardUser } from "@/lib/dashboard/data";
 
 export default function AdminFarmersPage() {
-  const [farmers, setFarmers] = useState<DashboardUser[]>(
-    dashboardUsers.filter((item) => item.role === "farmer")
-  );
+  const [farmers, setFarmers] = useState<DashboardUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteUser, setDeleteUser] = useState<DashboardUser | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const loadFarmers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await GetUsers("farmer");
+      setFarmers(res.data);
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFarmers();
+  }, [loadFarmers]);
 
   const activeCount = farmers.filter((item) => item.status === "ACTIVE").length;
-  const totalProducts = 12;
 
-  const toggleStatus = (id: string) => {
-    setFarmers((prev) =>
-      prev.map((item) => {
-        if (item.id !== id) return item;
-        const next: UserStatus = item.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-        toast.success(
-          next === "ACTIVE"
-            ? `${item.name} সক্রিয় করা হয়েছে`
-            : `${item.name} নিষ্ক্রিয় করা হয়েছে`
-        );
-        return { ...item, status: next };
-      })
-    );
+  const handleDelete = async () => {
+    if (!deleteUser) return;
+    setDeleteLoading(true);
+    try {
+      await DeleteUser(deleteUser.id);
+      toast.success(`${deleteUser.name} মুছে ফেলা হয়েছে`);
+      setFarmers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+      setDeleteUser(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "মুছে ফেলা যায়নি");
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -61,7 +75,7 @@ export default function AdminFarmersPage() {
         />
         <StatCard
           label="মোট প্রকাশিত পণ্য"
-          value={totalProducts}
+          value={loading ? "-" : "—"}
           icon={Package}
           tone="blue"
           delay={0.1}
@@ -69,26 +83,31 @@ export default function AdminFarmersPage() {
       </div>
 
       <SectionCard>
-        <UserTable
-          users={farmers}
+        <AdminUserListPanel
+          role="farmer"
           showRole={false}
-          action={(user) =>
-            user.role === "admin" ? null : (
-              <button
-                type="button"
-                onClick={() => toggleStatus(user.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  user.status === "ACTIVE"
-                    ? "bg-red-50 text-red-600 hover:bg-red-100"
-                    : "bg-green-50 text-green-700 hover:bg-green-100"
-                }`}
-              >
-                {user.status === "ACTIVE" ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}
-              </button>
-            )
-          }
+          action={(user) => (
+            <button
+              type="button"
+              onClick={() => setDeleteUser(user)}
+              className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+            >
+              মুছে ফেলুন
+            </button>
+          )}
         />
       </SectionCard>
+
+      <ConfirmDialog
+        open={!!deleteUser}
+        title="কৃষক মুছে ফেলবেন?"
+        description={`"${deleteUser?.name}" কে প্ল্যাটফর্ম থেকে মুছে ফেলা হবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।`}
+        confirmLabel={deleteLoading ? "মুছে ফেলা হচ্ছে..." : "হ্যাঁ, মুছে ফেলুন"}
+        cancelLabel="বাতিল"
+        confirmTone="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteUser(null)}
+      />
     </>
   );
 }
