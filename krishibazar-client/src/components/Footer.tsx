@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Sprout } from "lucide-react";
+import Image from "next/image";
+import Logo from "@/assets/logo.png";
 
 const socialLinks = [
   {
@@ -72,9 +74,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-700">
-                <Sprout className="h-5 w-5 text-white" />
-              </span>
+              <Image 
+                src={Logo} 
+                alt="কৃষিবাজার লোগো" 
+                width={36} 
+                height={36} 
+                className="w-9 h-9 rounded-full object-cover shadow-sm border border-white/20"
+              />
               <span className="text-lg font-bold text-white">
                 কৃষিবাজার
               </span>

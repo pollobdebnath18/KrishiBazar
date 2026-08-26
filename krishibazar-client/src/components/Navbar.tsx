@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import Logo from "@/assets/logo.png"
 import {
   ChevronDown,
   LayoutDashboard,
@@ -11,6 +12,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 
 const navLinks = [
   { label: "হোম", href: "/" },
@@ -73,9 +75,15 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-white shadow-md">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="text-2xl sm:text-3xl" aria-hidden="true">
-            🌾
-          </span>
+          <Image
+            src={Logo}
+            alt="কৃষিবাজার লোগো"
+            width={48}
+            height={48}
+            priority
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover shadow-sm border border-green-100"
+          />
+
           <span className="text-xl font-bold text-green-700 sm:text-2xl">
             কৃষিবাজার
           </span>
@@ -125,9 +133,8 @@ export default function Navbar() {
                   {initials}
                 </span>
                 <ChevronDown
-                  className={`h-4 w-4 text-gray-500 transition-transform ${
-                    profileOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 text-gray-500 transition-transform ${profileOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
