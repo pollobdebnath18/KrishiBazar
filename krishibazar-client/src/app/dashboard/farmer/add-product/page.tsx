@@ -94,7 +94,7 @@ export default function FarmerAddProductPage() {
         image: form.image.trim(),
         location: form.location.trim(),
         category: form.category.trim(),
-        farmerId: user.id,
+        // farmerId: user.id,
       });
       toast.success("পণ্য সফলভাবে প্রকাশিত হয়েছে");
       setForm(emptyForm);
