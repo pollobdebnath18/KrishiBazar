@@ -1,5 +1,11 @@
 import { apiClient } from "./client";
-import type { ProductResponse } from "@/types/product";
+import type { Product, ProductResponse } from "@/types/product";
+
+export interface ProductDetailResponse {
+  success: boolean;
+  message: string;
+  data: Product;
+}
 
 export interface ProductFilters {
   search?: string;
@@ -31,6 +37,10 @@ export async function getProducts(
 
   const queryString = params.toString();
   return apiClient(queryString ? `/products?${queryString}` : "/products");
+}
+
+export async function getProduct(id: string): Promise<ProductDetailResponse> {
+  return apiClient(`/products/${encodeURIComponent(id)}`);
 }
 
 export async function createProduct(

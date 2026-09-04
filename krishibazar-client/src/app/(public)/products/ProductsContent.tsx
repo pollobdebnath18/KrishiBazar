@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { MapPin, ShoppingBasket, Search, X } from "lucide-react";
 import { getProducts } from "@/lib/api/products";
 import { formatPrice } from "@/lib/format";
@@ -147,7 +148,7 @@ export default function ProductsContent({
         )}
 
         {viewState === "ready" && (
-          <>
+              className="relative z-20 flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 text-white shadow-md shadow-green-600/25 transition-all hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none"
             {/* Filters */}
             {(products.length > 0 || isFiltering) && (
               <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
@@ -261,8 +262,13 @@ function ProductCard({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
       whileHover={{ y: -4 }}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-lg"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-lg"
     >
+      <Link
+        href={`/products/${product.id}`}
+        aria-label={`${product.title} এর বিস্তারিত দেখুন`}
+        className="absolute inset-0 z-10"
+      />
       <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
         {showImage ? (
           <Image
