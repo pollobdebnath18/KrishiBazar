@@ -42,27 +42,31 @@ export async function getProducts(
     params.set("location", filters.location);
 
   const queryString = params.toString();
-  return apiClient(queryString ? `/products?${queryString}` : "/products");
+  return apiClient<ProductResponse>(
+    queryString ? `/products?${queryString}` : "/products",
+  );
 }
 
 export async function getProduct(id: string): Promise<ProductDetailResponse> {
-  return apiClient(`/products/${encodeURIComponent(id)}`);
+  return apiClient<ProductDetailResponse>(
+    `/products/${encodeURIComponent(id)}`,
+  );
 }
 
 export async function createProduct(
   input: CreateProductInput,
 ): Promise<CreateProductResponse> {
-  return apiClient("/products", {
+  return apiClient<CreateProductResponse>("/products", {
     method: "POST",
     body: JSON.stringify(input),
-  }) as Promise<CreateProductResponse>;
+  });
 }
 
 export async function updateProduct(
   id: string,
   input: Partial<CreateProductInput> & { featured?: boolean },
 ): Promise<ProductDetailResponse> {
-  return apiClient(`/products/${encodeURIComponent(id)}`, {
+  return apiClient<ProductDetailResponse>(`/products/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body: JSON.stringify(input),
   });
@@ -75,6 +79,8 @@ export async function deleteProduct(id: string): Promise<void> {
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
-  const response = await apiClient("/products/featured");
-  return response.data as Product[];
+  const response = await apiClient<{ success: boolean; message: string; data: Product[] }>(
+    "/products/featured",
+  );
+  return response.data;
 }

@@ -8,5 +8,5 @@ export interface OrdersResponse {
 }
 
 export async function getOrders(): Promise<OrdersResponse> {
-  return apiClient("/orders");
+  return apiClient<OrdersResponse>("/orders");
 }

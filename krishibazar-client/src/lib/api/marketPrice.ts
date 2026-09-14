@@ -22,16 +22,16 @@ export interface CreateMarketPriceInput {
 }
 
 export async function createMarketPrice(
-  input: CreateMarketPriceInput
+  input: CreateMarketPriceInput,
 ): Promise<MarketPriceResponse> {
-  return apiClient("/marketPrice", {
+  return apiClient<MarketPriceResponse>("/marketPrice", {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
 export async function getMarketPrices(
-  filters: MarketPriceFilters = {}
+  filters: MarketPriceFilters = {},
 ): Promise<MarketPriceResponse> {
   const params = new URLSearchParams();
 
@@ -44,23 +44,25 @@ export async function getMarketPrices(
     params.set("status", filters.status);
 
   const queryString = params.toString();
-  return apiClient(queryString ? `/marketPrice?${queryString}` : "/marketPrice");
+  return apiClient<MarketPriceResponse>(
+    queryString ? `/marketPrice?${queryString}` : "/marketPrice",
+  );
 }
 
 export async function updateMarketPrice(
   id: string,
-  input: Partial<CreateMarketPriceInput>
+  input: Partial<CreateMarketPriceInput>,
 ): Promise<MarketPriceResponse> {
-  return apiClient(`/marketPrice/${id}`, {
+  return apiClient<MarketPriceResponse>(`/marketPrice/${id}`, {
     method: "PATCH",
     body: JSON.stringify(input),
   });
 }
 
 export async function deleteMarketPrice(
-  id: string
+  id: string,
 ): Promise<MarketPriceResponse> {
-  return apiClient(`/marketPrice/${id}`, {
+  return apiClient<MarketPriceResponse>(`/marketPrice/${id}`, {
     method: "DELETE",
   });
 }

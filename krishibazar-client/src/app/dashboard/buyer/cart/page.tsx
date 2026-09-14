@@ -1,28 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ArrowRight, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
-import { cartLines as initialCart, type CartLine } from "@/lib/dashboard/data";
+import type { CartLine } from "@/lib/dashboard/data";
 import { formatPrice } from "@/lib/format";
 
+const CART_KEY = "krishibazar_cart_lines";
+
 export default function BuyerCartPage() {
-  const [cart, setCart] = useState<CartLine[]>(initialCart);
+  const [cart, setCart] = useState<CartLine[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(CART_KEY);
+      setCart(raw ? JSON.parse(raw) : []);
+    } catch {
+      setCart([]);
+    }
+  }, []);
+
+  const persistCart = (next: CartLine[]) => {
+    setCart(next);
+    window.localStorage.setItem(CART_KEY, JSON.stringify(next));
+  };
 
   const changeQuantity = (id: string, delta: number) => {
-    setCart((prev) =>
-      prev.map((line) => {
+    const next = cart
+      .map((line) => {
         if (line.id !== id) return line;
-        const next = Math.max(1, Math.min(line.quantity + delta, 999));
-        return { ...line, quantity: next };
+        const updated = Math.max(1, Math.min(line.quantity + delta, 999));
+        return { ...line, quantity: updated };
       })
-    );
+      .filter((line) => line.quantity > 0);
+
+    persistCart(next);
   };
 
   const removeLine = (id: string) => {
-    setCart((prev) => prev.filter((line) => line.id !== id));
+    const next = cart.filter((line) => line.id !== id);
+    persistCart(next);
     toast.info("আইটেম কার্ট থেকে সরানো হয়েছে");
   };
 
@@ -53,7 +72,6 @@ export default function BuyerCartPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Cart lines */}
         <SectionCard
           title="পণ্যের তালিকা"
           subtitle="পরিমাণ পরিবর্তন করুন বা সরান"
@@ -133,7 +151,6 @@ export default function BuyerCartPage() {
           )}
         </SectionCard>
 
-        {/* Summary */}
         <SectionCard
           title="অর্ডার সারাংশ"
           subtitle="পেমেন্ট চেকআউটে সম্পন্ন হবে"

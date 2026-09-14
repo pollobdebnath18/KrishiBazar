@@ -1,25 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Package, Search } from "lucide-react";
 import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
 import StatCard from "@/components/dashboard/StatCard";
 import ProductCard from "@/components/dashboard/ProductCard";
-import { buyerProducts } from "@/lib/dashboard/data";
+import { getProducts } from "@/lib/api/products";
+import type { Product } from "@/types/product";
 
 export default function BuyerBrowseProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const filtered = buyerProducts.filter((product) =>
+  useEffect(() => {
+    let mounted = true;
+    getProducts()
+      .then((response) => {
+        if (!mounted) return;
+        setProducts(response.data);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setProducts([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filtered = products.filter((product) =>
     `${product.title} ${product.category} ${product.location}`
       .toLowerCase()
-      .includes(query.trim().toLowerCase())
+      .includes(query.trim().toLowerCase()),
   );
 
-  const inStock = buyerProducts.filter(
-    (product) => product.quantity > 0
-  ).length;
+  const inStock = products.filter((product) => product.quantity > 0).length;
 
   return (
     <>
@@ -31,14 +52,14 @@ export default function BuyerBrowseProductsPage() {
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard
           label="মোট পণ্য"
-          value={buyerProducts.length}
+          value={loading ? "—" : products.length}
           icon={Package}
           tone="emerald"
           delay={0}
         />
         <StatCard
           label="স্টকে আছে"
-          value={inStock}
+          value={loading ? "—" : inStock}
           icon={Package}
           tone="green"
           delay={0.05}
@@ -63,7 +84,11 @@ export default function BuyerBrowseProductsPage() {
           </div>
         }
       >
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-12 text-center">
+            <p className="text-lg font-bold text-gray-900">লোড হচ্ছে...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-12 text-center">
             <p className="text-lg font-bold text-gray-900">
               কোনো পণ্য পাওয়া যায়নি

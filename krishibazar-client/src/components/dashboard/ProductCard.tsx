@@ -6,21 +6,52 @@ import { motion } from "framer-motion";
 import { MapPin, Plus, ShoppingBasket } from "lucide-react";
 import { toast } from "react-toastify";
 import type { DashboardProduct } from "@/lib/dashboard/data";
+import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";
 import { translateProductTitle } from "@/lib/bangla";
+import type { CartLine } from "@/lib/dashboard/data";
+
+const CART_KEY = "krishibazar_cart_lines";
+
+type ProductCardItem = DashboardProduct | Product;
 
 export default function ProductCard({
   product,
   index = 0,
 }: {
-  product: DashboardProduct;
+  product: ProductCardItem;
   index?: number;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = product.image && !imageFailed;
 
   const handleAdd = () => {
-    toast.success(`"${product.title}" কার্টে যোগ হয়েছে`);
+    if (typeof window === "undefined") return;
+
+    try {
+      const raw = window.localStorage.getItem(CART_KEY);
+      const existing: CartLine[] = raw ? JSON.parse(raw) : [];
+
+      const found = existing.find((line) => line.productId === product.id);
+      if (found) {
+        found.quantity += 1;
+      } else {
+        existing.push({
+          id: `${product.id}-${Date.now()}`,
+          productId: product.id,
+          title: product.title,
+          unit: product.unit,
+          price: product.price,
+          quantity: 1,
+          image: product.image,
+        });
+      }
+
+      window.localStorage.setItem(CART_KEY, JSON.stringify(existing));
+      toast.success(`"${product.title}" কার্টে যোগ হয়েছে`);
+    } catch {
+      toast.error("কার্ট আপডেট করা যায়নি");
+    }
   };
 
   return (
@@ -31,7 +62,6 @@ export default function ProductCard({
       whileHover={{ y: -4 }}
       className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-lg"
     >
-      {/* Image */}
       <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
         {showImage ? (
           <Image
@@ -53,10 +83,11 @@ export default function ProductCard({
         )}
       </div>
 
-      {/* Body */}
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-bold text-gray-900">{translateProductTitle(product.title)}</h3>
+          <h3 className="text-base font-bold text-gray-900">
+            {translateProductTitle(product.title)}
+          </h3>
           <span className="shrink-0 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
             {product.category}
           </span>
@@ -73,8 +104,10 @@ export default function ProductCard({
               {formatPrice(product.price)}
             </p>
             <p className="text-xs text-gray-500">
-              প্রতি {product.unit} ·{" "}
-              {product.quantity > 0 ? `${product.quantity} ${product.unit} আছে` : "স্টকে নেই"}
+              প্রতি {product.unit} · {" "}
+              {product.quantity > 0
+                ? `${product.quantity} ${product.unit} আছে`
+                : "স্টকে নেই"}
             </p>
           </div>
 

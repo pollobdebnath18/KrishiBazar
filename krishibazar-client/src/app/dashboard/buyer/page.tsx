@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -14,27 +15,60 @@ import SectionCard from "@/components/dashboard/SectionCard";
 import StatCard from "@/components/dashboard/StatCard";
 import OrdersTable from "@/components/dashboard/OrdersTable";
 import ProductCard from "@/components/dashboard/ProductCard";
-import {
-  buyerOrders,
-  buyerProducts,
-  cartLines,
-} from "@/lib/dashboard/data";
+import { getOrders } from "@/lib/api/orders";
+import { getProducts } from "@/lib/api/products";
+import type { Product } from "@/types/product";
+import type { CartLine, DashboardOrder } from "@/lib/dashboard/data";
+
+const CART_KEY = "krishibazar_cart_lines";
 
 export default function BuyerDashboardPage() {
   const { user } = useAuth();
+  const [orders, setOrders] = useState<DashboardOrder[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pendingOrders = buyerOrders.filter(
-    (item) => item.status === "PENDING"
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([getOrders(), getProducts()])
+      .then(([ordersResponse, productsResponse]) => {
+        if (cancelled) return;
+        setOrders(ordersResponse.data);
+        setProducts(productsResponse.data);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setOrders([]);
+        setProducts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    try {
+      const raw = window.localStorage.getItem(CART_KEY);
+      setCart(raw ? JSON.parse(raw) : []);
+    } catch {
+      setCart([]);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const pendingOrders = orders.filter((item) => item.status === "PENDING").length;
+  const completedOrders = orders.filter(
+    (item) => item.status === "DELIVERED",
   ).length;
-  const completedOrders = buyerOrders.filter(
-    (item) => item.status === "DELIVERED"
-  ).length;
-  const cartItems = cartLines.reduce((sum, line) => sum + line.quantity, 0);
-  const cartSubtotal = cartLines.reduce(
+  const cartItems = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const cartSubtotal = cart.reduce(
     (sum, line) => sum + line.price * line.quantity,
-    0
+    0,
   );
-  const recentlyViewed = buyerProducts.slice(0, 3);
+  const recentlyViewed = products.slice(0, 3);
 
   return (
     <>
@@ -46,7 +80,7 @@ export default function BuyerDashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="মোট অর্ডার"
-          value={buyerOrders.length}
+          value={loading ? "—" : orders.length}
           icon={ClipboardList}
           tone="blue"
           delay={0}
@@ -70,7 +104,7 @@ export default function BuyerDashboardPage() {
           value={cartItems}
           icon={ShoppingCart}
           tone="violet"
-          hint={`মোট ${cartSubtotal}৳`}
+          hint={cartItems ? `মোট ${cartSubtotal}৳` : "মোট ০৳"}
           delay={0.15}
         />
       </div>
@@ -86,7 +120,7 @@ export default function BuyerDashboardPage() {
           subtitle="আপনার সর্বশেষ অর্ডারগুলো"
         >
           <OrdersTable
-            orders={buyerOrders}
+            orders={orders.slice(0, 4)}
             partyKey="farmer"
             partyLabel="কৃষক"
             limit={4}

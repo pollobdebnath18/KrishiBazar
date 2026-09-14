@@ -1,19 +1,42 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { CheckCircle2, ClipboardList, Clock } from "lucide-react";
 import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
 import StatCard from "@/components/dashboard/StatCard";
 import OrdersTable from "@/components/dashboard/OrdersTable";
-import { buyerOrders } from "@/lib/dashboard/data";
+import { getOrders } from "@/lib/api/orders";
+import type { DashboardOrder } from "@/lib/dashboard/data";
 
 export default function BuyerMyOrdersPage() {
-  const pendingCount = buyerOrders.filter(
-    (item) => item.status === "PENDING"
-  ).length;
-  const completedCount = buyerOrders.filter(
-    (item) => item.status === "DELIVERED"
+  const [orders, setOrders] = useState<DashboardOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    getOrders()
+      .then((response) => {
+        if (!mounted) return;
+        setOrders(response.data);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setOrders([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const pendingCount = orders.filter((item) => item.status === "PENDING").length;
+  const completedCount = orders.filter(
+    (item) => item.status === "DELIVERED",
   ).length;
 
   return (
@@ -26,7 +49,7 @@ export default function BuyerMyOrdersPage() {
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="মোট অর্ডার"
-          value={buyerOrders.length}
+          value={loading ? "—" : orders.length}
           icon={ClipboardList}
           tone="blue"
           delay={0}
@@ -52,7 +75,7 @@ export default function BuyerMyOrdersPage() {
         subtitle="কৃষকের কাছ থেকে সরাসরি অর্ডার ট্র্যাক করুন"
       >
         <OrdersTable
-          orders={buyerOrders}
+          orders={orders}
           partyKey="farmer"
           partyLabel="কৃষক"
           action={(order) => (
