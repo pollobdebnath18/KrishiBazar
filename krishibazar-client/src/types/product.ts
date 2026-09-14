@@ -8,6 +8,7 @@ export interface Product {
   image: string;
   location: string;
   category: string;
+  featured: boolean;
   createdAt: string;
   updatedAt: string;
 }

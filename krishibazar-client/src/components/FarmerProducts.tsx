@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin, ShoppingBasket } from "lucide-react";
-import { getProducts } from "@/lib/api/products";
+import { getFeaturedProducts } from "@/lib/api/products";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/types/product";
 
@@ -14,10 +14,18 @@ export default function FarmerProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProducts({})
-      .then((res) => setProducts(res.data.slice(0, 8)))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const fetchFeaturedProducts = async () => {
+      try {
+        const featuredProducts = await getFeaturedProducts();
+        setProducts(featuredProducts);
+      } catch {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
   }, []);
 
   if (loading) {
@@ -53,7 +61,6 @@ export default function FarmerProducts() {
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -73,7 +80,6 @@ export default function FarmerProducts() {
           </p>
         </motion.div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((product, index) => (
             <motion.article
@@ -85,7 +91,6 @@ export default function FarmerProducts() {
               whileHover={{ y: -4 }}
               className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-lg"
             >
-              {/* Image */}
               <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
                 {product.image ? (
                   <Image
@@ -106,7 +111,6 @@ export default function FarmerProducts() {
                 )}
               </div>
 
-              {/* Body */}
               <div className="flex flex-1 flex-col p-4">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-base font-bold text-gray-900">
@@ -138,7 +142,6 @@ export default function FarmerProducts() {
           ))}
         </div>
 
-        {/* View all link */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

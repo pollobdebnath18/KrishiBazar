@@ -7,6 +7,12 @@ export interface ProductDetailResponse {
   data: Product;
 }
 
+export interface CreateProductResponse {
+  success: boolean;
+  message: string;
+  data: Product;
+}
+
 export interface ProductFilters {
   search?: string;
   category?: string;
@@ -25,7 +31,7 @@ export interface CreateProductInput {
 }
 
 export async function getProducts(
-  filters: ProductFilters = {}
+  filters: ProductFilters = {},
 ): Promise<ProductResponse> {
   const params = new URLSearchParams();
 
@@ -44,10 +50,31 @@ export async function getProduct(id: string): Promise<ProductDetailResponse> {
 }
 
 export async function createProduct(
-  input: CreateProductInput
-): Promise<ProductResponse> {
+  input: CreateProductInput,
+): Promise<CreateProductResponse> {
   return apiClient("/products", {
     method: "POST",
     body: JSON.stringify(input),
+  }) as Promise<CreateProductResponse>;
+}
+
+export async function updateProduct(
+  id: string,
+  input: Partial<CreateProductInput> & { featured?: boolean },
+): Promise<ProductDetailResponse> {
+  return apiClient(`/products/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
   });
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  await apiClient(`/products/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  const response = await apiClient("/products/featured");
+  return response.data as Product[];
 }

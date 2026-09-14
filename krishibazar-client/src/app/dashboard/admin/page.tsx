@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -18,12 +19,13 @@ import StatCard from "@/components/dashboard/StatCard";
 import { BarChart } from "@/components/dashboard/MiniCharts";
 import {
   adminActivity,
-  adminDashboardProducts,
   adminOrders,
   dashboardUsers,
   marketPriceTrend,
   type ActivityType,
 } from "@/lib/dashboard/data";
+import { getProducts } from "@/lib/api/products";
+import type { Product } from "@/types/product";
 import { translateProductTitle } from "@/lib/bangla";
 
 const activityIcons: Record<ActivityType, LucideIcon> = {
@@ -35,12 +37,32 @@ const activityIcons: Record<ActivityType, LucideIcon> = {
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const response = await getProducts();
+        if (mounted) {
+          setProducts(response.data);
+        }
+      } catch {
+        if (mounted) {
+          setProducts([]);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const farmers = dashboardUsers.filter((item) => item.role === "farmer");
   const buyers = dashboardUsers.filter((item) => item.role === "buyer");
-  const activeProducts = adminDashboardProducts.filter(
-    (item) => item.status === "ACTIVE"
-  );
+  const activeProducts = products.filter((item) => item.quantity > 0);
 
   return (
     <>
@@ -79,7 +101,7 @@ export default function AdminDashboardPage() {
         />
         <StatCard
           label="মোট পণ্য"
-          value={adminDashboardProducts.length}
+          value={products.length}
           icon={Package}
           tone="emerald"
           hint={`${activeProducts.length}টি প্রকাশিত`}

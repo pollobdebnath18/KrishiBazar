@@ -35,6 +35,7 @@ export interface DashboardProduct {
   unit: string;
   quantity: number;
   image: string;
+  featured?: boolean;
   status: ProductStatus;
   sold: number;
   revenue: number;
@@ -177,6 +178,7 @@ export const adminDashboardProducts: DashboardProduct[] = [
     unit: "কেজি",
     quantity: 60,
     image: "",
+    featured: false,
     status: "OUT_OF_STOCK",
     sold: 95,
     revenue: 20900,
@@ -203,6 +205,7 @@ export const adminDashboardProducts: DashboardProduct[] = [
     unit: "পিস",
     quantity: 800,
     image: "",
+    featured: true,
     status: "ACTIVE",
     sold: 1200,
     revenue: 21600,
@@ -216,6 +219,7 @@ export const adminDashboardProducts: DashboardProduct[] = [
     unit: "লিটার",
     quantity: 0,
     image: "",
+    featured: false,
     status: "INACTIVE",
     sold: 64,
     revenue: 16640,

@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
 
 export async function apiClient(endpoint: string, options: RequestInit = {}) {
   const token =
@@ -12,10 +13,30 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
       ...options.headers,
     },
   });
-  const data = await response.json();
+
+  const text = await response.text();
+
+  if (!text) {
+    return null;
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("text/html") || text.trim().startsWith("<!DOCTYPE")) {
+    throw new Error("API returned an HTML page instead of JSON. Check the backend base URL.");
+  }
+
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("API returned a non-JSON response.");
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || "something went wrong");
+    const payload = data as { message?: string };
+    throw new Error(payload.message || "something went wrong");
   }
+
   return data;
 }

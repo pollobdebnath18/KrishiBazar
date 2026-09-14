@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
   CheckCircle2,
@@ -12,11 +12,35 @@ import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
 import StatCard from "@/components/dashboard/StatCard";
 import OrdersTable from "@/components/dashboard/OrdersTable";
-import { adminOrders } from "@/lib/dashboard/data";
+import { getOrders } from "@/lib/api/orders";
+import type { DashboardOrder } from "@/lib/dashboard/data";
 
 export default function AdminOrdersPage() {
   const [filter, setFilter] = useState<string>("ALL");
-  const orders = adminOrders;
+  const [orders, setOrders] = useState<DashboardOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const response = await getOrders();
+        if (!mounted) return;
+        setOrders(response.data);
+      } catch {
+        toast.error("অর্ডার লোড করতে সমস্যা হয়েছে");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const pendingCount = orders.filter((item) => item.status === "PENDING").length;
   const deliveredCount = orders.filter(
@@ -86,21 +110,27 @@ export default function AdminOrdersPage() {
           </div>
         }
       >
-        <OrdersTable
-          orders={visibleOrders}
-          partyKey="customer"
-          partyLabel="ক্রেতা"
-          action={(order) => (
-            <button
-              type="button"
-              onClick={() => toast.info(`${order.orderNumber} এর বিস্তারিত দেখছেন`)}
-              className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-green-50 hover:text-green-700"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              বিস্তারিত
-            </button>
-          )}
-        />
+        {loading ? (
+          <div className="px-6 py-8 text-sm font-medium text-gray-500">
+            অর্ডার তালিকা লোড হচ্ছে...
+          </div>
+        ) : (
+          <OrdersTable
+            orders={visibleOrders}
+            partyKey="customer"
+            partyLabel="ক্রেতা"
+            action={(order) => (
+              <button
+                type="button"
+                onClick={() => toast.info(`${order.orderNumber} এর বিস্তারিত দেখছেন`)}
+                className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-green-50 hover:text-green-700"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                বিস্তারিত
+              </button>
+            )}
+          />
+        )}
       </SectionCard>
     </>
   );
