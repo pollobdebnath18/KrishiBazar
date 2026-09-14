@@ -83,6 +83,19 @@ const orders = [
   },
 ];
 
+const normalizeCart = (cart: Array<Record<string, unknown>>) =>
+  Array.isArray(cart)
+    ? cart.map((item) => ({
+        id: String(item.id ?? item.productId ?? `${Date.now()}-${Math.random()}`),
+        productId: String(item.productId ?? item.id ?? "product"),
+        title: String(item.title ?? "KrishiBazar Product"),
+        unit: String(item.unit ?? "কেজি"),
+        price: Number(item.price ?? 0),
+        quantity: Number(item.quantity ?? 1),
+        image: String(item.image ?? ""),
+      }))
+    : [];
+
 router.get("/", async (_, res) => {
   try {
     return res.status(200).json({
@@ -95,6 +108,127 @@ router.get("/", async (_, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  const item = orders.find((order) => order.id === id || order.orderNumber === id);
+
+  if (!item) {
+    return res.status(404).json({
+      success: false,
+      message: "Order not found",
+      data: null,
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Order fetched successfully",
+    data: item,
+  });
+});
+
+router.post("/", async (req, res) => {
+  try {
+    const cart = normalizeCart(req.body?.cart ?? []);
+    if (cart.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cart is empty",
+      });
+    }
+
+    const orderTotal = cart.reduce(
+      (sum, line) => sum + Number(line.price) * Number(line.quantity),
+      0,
+    );
+
+    const paymentSelection = String(req.body?.paymentMethod ?? "BKASH");
+
+    const order = {
+      id: `o-${Date.now()}`,
+      orderNumber: `KB-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.round(1000 + Math.random() * 8999)}`,
+      customer: req.body?.customer ?? "ক্রেতা",
+      farmer: req.body?.farmer ?? "কৃষক",
+      product: cart[0]?.title ?? "কৃষি পণ্য",
+      quantity: cart.reduce((sum, line) => sum + Number(line.quantity), 0),
+      unit: cart[0]?.unit ?? "কেজি",
+      total: orderTotal,
+      status: "PENDING",
+      payment: paymentSelection === "CARD" ? "CARD" : "BKASH",
+      date: new Date().toISOString().slice(0, 10),
+    };
+
+    orders.push(order);
+
+    return res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      data: order,
+    });
+  } catch (err) {
+    console.error("CREATE ORDER ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to create order",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+  }
+});
+
+router.post("/checkout", async (req, res) => {
+  try {
+    const cart = normalizeCart(req.body?.cart ?? []);
+    if (!cart.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Cart is empty",
+      });
+    }
+
+    const total = cart.reduce(
+      (sum, line) => sum + Number(line.price) * Number(line.quantity),
+      0,
+    );
+
+    const paymentMethod = String(req.body?.paymentMethod ?? "BKASH").toUpperCase();
+    const orderNumber = `KB-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.round(1000 + Math.random() * 8999)}`;
+
+    const generatedOrder = {
+      id: `o-${Date.now()}`,
+      orderNumber,
+      customer: req.body?.customer ?? "ক্রেতা",
+      farmer: req.body?.farmer ?? "কৃষক",
+      product: cart[0]?.title ?? "কৃষি পণ্য",
+      quantity: cart.reduce((sum, line) => sum + Number(line.quantity), 0),
+      unit: cart[0]?.unit ?? "কেজি",
+      total,
+      status: "PENDING",
+      payment: paymentMethod === "CARD" ? "CARD" : "BKASH",
+      date: new Date().toISOString().slice(0, 10),
+    };
+
+    orders.push(generatedOrder);
+
+    return res.status(200).json({
+      success: true,
+      message: "Checkout session created in local payment mode",
+      data: {
+        sessionId: `local_${Date.now()}`,
+        checkoutUrl: `/checkout/success?orderNumber=${generatedOrder.orderNumber}`,
+        order: generatedOrder,
+        paymentMode: paymentMethod,
+      },
+    });
+  } catch (err) {
+    console.error("CREATE CHECKOUT ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to create checkout session",
       error: err instanceof Error ? err.message : "Unknown error",
     });
   }

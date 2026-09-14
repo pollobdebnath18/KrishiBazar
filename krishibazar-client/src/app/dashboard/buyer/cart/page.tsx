@@ -7,24 +7,18 @@ import PageHeader from "@/components/dashboard/PageHeader";
 import SectionCard from "@/components/dashboard/SectionCard";
 import type { CartLine } from "@/lib/dashboard/data";
 import { formatPrice } from "@/lib/format";
-
-const CART_KEY = "krishibazar_cart_lines";
+import { readCart, writeCart } from "@/lib/cart";
 
 export default function BuyerCartPage() {
   const [cart, setCart] = useState<CartLine[]>([]);
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(CART_KEY);
-      setCart(raw ? JSON.parse(raw) : []);
-    } catch {
-      setCart([]);
-    }
+    setCart(readCart());
   }, []);
 
   const persistCart = (next: CartLine[]) => {
     setCart(next);
-    window.localStorage.setItem(CART_KEY, JSON.stringify(next));
+    writeCart(next);
   };
 
   const changeQuantity = (id: string, delta: number) => {

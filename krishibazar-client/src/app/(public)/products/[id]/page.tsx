@@ -20,6 +20,7 @@ import {
   translateProductTitle,
 } from "@/lib/bangla";
 import type { Product } from "@/types/product";
+import { getCartKey, readCart, writeCart } from "@/lib/cart";
 
 type ViewState = "loading" | "ready" | "error";
 
@@ -59,6 +60,38 @@ export default function ProductDetailsPage({
       window.clearTimeout(timer);
     };
   }, [id]);
+
+  const addToCart = () => {
+    if (!product || product.quantity <= 0) {
+      return;
+    }
+
+    try {
+      const cart = readCart();
+      const existing = cart.find(
+        (line: { productId: string }) => line.productId === product.id,
+      );
+
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({
+          id: `${product.id}-${Date.now()}`,
+          productId: product.id,
+          title: product.title,
+          unit: product.unit,
+          price: product.price,
+          quantity: 1,
+          image: product.image,
+        });
+      }
+
+      writeCart(cart);
+      toast.success(`"${translateProductTitle(product.title)}" কার্টে যোগ হয়েছে`);
+    } catch {
+      toast.error("কার্টে পণ্য যোগ করা যায়নি");
+    }
+  };
 
   if (viewState === "loading") return <ProductDetailsSkeleton />;
 
@@ -170,7 +203,7 @@ export default function ProductDetailsPage({
             <button
               type="button"
               disabled={product.quantity === 0}
-              onClick={() => toast.success(`"${title}" কার্টে যোগ হয়েছে`)}
+              onClick={addToCart}
               className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
             >
               <ShoppingBasket className="h-5 w-5" />

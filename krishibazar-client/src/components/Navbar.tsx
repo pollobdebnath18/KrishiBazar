@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Logo from "@/assets/logo.png"
+import Logo from "@/assets/logo.png";
 import {
   ChevronDown,
   LayoutDashboard,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
+import { readCart } from "@/lib/cart";
 
 const navLinks = [
   { label: "হোম", href: "/" },
@@ -42,10 +43,24 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const profileRef = useRef<HTMLDivElement>(null);
-  const cartCount = 0;
+
+  const refreshCartCount = () => {
+    try {
+      const cart = readCart();
+      const count = cart.reduce((sum: number, line: { quantity: number }) => {
+        return sum + Number(line.quantity || 0);
+      }, 0);
+      setCartCount(count);
+    } catch {
+      setCartCount(0);
+    }
+  };
 
   useEffect(() => {
+    refreshCartCount();
+
     function handleClickOutside(event: MouseEvent) {
       if (
         profileRef.current &&
@@ -54,8 +69,20 @@ export default function Navbar() {
         setProfileOpen(false);
       }
     }
+
+    function handleCartUpdated() {
+      refreshCartCount();
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("cart:updated", handleCartUpdated);
+    window.addEventListener("storage", handleCartUpdated);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("cart:updated", handleCartUpdated);
+      window.removeEventListener("storage", handleCartUpdated);
+    };
   }, []);
 
   const handleLogout = () => {

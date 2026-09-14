@@ -10,8 +10,7 @@ import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";
 import { translateProductTitle } from "@/lib/bangla";
 import type { CartLine } from "@/lib/dashboard/data";
-
-const CART_KEY = "krishibazar_cart_lines";
+import { getCartKey, readCart, writeCart } from "@/lib/cart";
 
 type ProductCardItem = DashboardProduct | Product;
 
@@ -29,9 +28,7 @@ export default function ProductCard({
     if (typeof window === "undefined") return;
 
     try {
-      const raw = window.localStorage.getItem(CART_KEY);
-      const existing: CartLine[] = raw ? JSON.parse(raw) : [];
-
+      const existing = readCart();
       const found = existing.find((line) => line.productId === product.id);
       if (found) {
         found.quantity += 1;
@@ -47,7 +44,7 @@ export default function ProductCard({
         });
       }
 
-      window.localStorage.setItem(CART_KEY, JSON.stringify(existing));
+      writeCart(existing);
       toast.success(`"${product.title}" কার্টে যোগ হয়েছে`);
     } catch {
       toast.error("কার্ট আপডেট করা যায়নি");

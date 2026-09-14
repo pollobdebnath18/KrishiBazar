@@ -19,8 +19,7 @@ import { getOrders } from "@/lib/api/orders";
 import { getProducts } from "@/lib/api/products";
 import type { Product } from "@/types/product";
 import type { CartLine, DashboardOrder } from "@/lib/dashboard/data";
-
-const CART_KEY = "krishibazar_cart_lines";
+import { readCart } from "@/lib/cart";
 
 export default function BuyerDashboardPage() {
   const { user } = useAuth();
@@ -47,12 +46,7 @@ export default function BuyerDashboardPage() {
         if (!cancelled) setLoading(false);
       });
 
-    try {
-      const raw = window.localStorage.getItem(CART_KEY);
-      setCart(raw ? JSON.parse(raw) : []);
-    } catch {
-      setCart([]);
-    }
+    setCart(readCart());
 
     return () => {
       cancelled = true;

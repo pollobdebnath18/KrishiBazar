@@ -51,7 +51,7 @@ export interface DashboardOrder {
   unit: string;
   total: number;
   status: OrderStatus;
-  payment: "COD" | "PAID";
+  payment: "COD" | "PAID" | "BKASH" | "CARD";
   date: string;
 }
 
