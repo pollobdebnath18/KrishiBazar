@@ -1,13 +1,34 @@
 # KrishiBazar — Bangladesh Agricultural Marketplace
 
-KrishiBazar (কৃষিবাজার) is a Bangla-first agricultural marketplace and market price dashboard for Bangladesh. The project connects farmers and buyers through a product discovery experience, market price information, role-based dashboards, and user accounts powered by a Next.js frontend and Express + Prisma backend.
+KrishiBazar (কৃষিবাজার) is a Bangla-first agricultural marketplace and market price dashboard for Bangladesh. The project connects farmers and buyers through product discovery, market price information, role-based dashboards, authentication, and buyer checkout flows.
+
+## Live Project Links
+
+### Client (Frontend)
+
+The live client is deployed on Vercel using the Vercel CLI method:
+
+- https://krishibazar-nine.vercel.app
+- https://krishibazar-gttqqpaut-pollobdebnath18s-projects.vercel.app
+
+### Server (Backend)
+
+The Express + Prisma backend is deployed on Render:
+
+- https://krishibazar-api.onrender.com
+
+### API Base
+
+The API route base is mounted under `/api/v1` on the Render service:
+
+- https://krishibazar-api.onrender.com/api/v1
 
 ## Project Overview
 
 The repository contains a two-part monorepo:
 
 - `krishibazar-client/` — Next.js 16 frontend UI with React 19 and TypeScript.
-- `KrishiBazar-server/` — Express 5 server with Prisma 7 and PostgreSQL integration.
+- `KrishiBazar-server/` — Express 5 server with Prisma 7 and PostgreSQL/NeonDB integration.
 
 The application supports three user roles:
 
@@ -15,7 +36,7 @@ The application supports three user roles:
 - Farmer
 - Buyer
 
-It includes dashboards, product publishing, market price cards, contact submission, and authentication flows.
+It includes dashboards, product publishing, market price cards, contact submission, authentication flows, cart handling, and checkout/order UI screens.
 
 ## Core Features
 
@@ -24,7 +45,7 @@ It includes dashboards, product publishing, market price cards, contact submissi
 - Product listing and search across title, category, location, and description.
 - Product detail routes and product cards.
 - Featured product support through the `featured` Boolean field.
-- Product creation, update, and deletion in the product services.
+- Product creation, update, and deletion in the Express product services.
 - Admin product management page with product deletion confirmation workflow.
 
 ### Market Price System
@@ -43,12 +64,18 @@ It includes dashboards, product publishing, market price cards, contact submissi
 
 - User registration and login endpoints using Express routes and JWT.
 - Password hashing with `bcryptjs`.
-- Middleware-free JWT support through the Express services.
-- Current-user retrieval through `/users/me`.
+- Token-based session and current-user retrieval through `/users/me`.
 
 ### Contact
 
 - Contact form submission stored through Prisma `Contact` records.
+
+### Cart & Checkout UI
+
+- Cart storage is kept by the logged-in client user in local browser storage.
+- Cart items can be added from product cards and product detail pages.
+- Checkout route accepts cart data and uses a local mock order generation flow.
+- Payment UI currently shows bKash and Card method cards, but the payment gateway is not implemented yet. The UI displays the bKash card and Card card only for order-flow demonstration.
 
 ## Technology Stack
 
@@ -68,10 +95,20 @@ It includes dashboards, product publishing, market price cards, contact submissi
 - Express 5.2.1
 - TypeScript
 - Prisma 7.9.1
-- PostgreSQL via Prisma PostgreSQL adapter
+- PostgreSQL / PostgreSQL-compatible database via NeonDB
 - JWT authentication
 - bcryptjs
 - CORS and dotenv
+
+## Deployment
+
+The project is deployed across separate services:
+
+- Client: Vercel, deployed from the local workspace using the Vercel CLI (`npx vercel --prod`).
+- Server/API: Render.
+- Database: PostgreSQL on NeonDB.
+
+This structure keeps the Next.js frontend, Express API, and PostgreSQL database separate but connected through environment configuration.
 
 ## Architecture
 
@@ -91,7 +128,7 @@ On the client side, the UI is organized by page route and reusable component fol
 
 ## API Structure
 
-The backend exposes the routes under `/api/v1`:
+The backend exposes routes under `/api/v1`:
 
 - `/api/v1/products`
 - `/api/v1/users`
@@ -161,7 +198,7 @@ JWT_SECRET=your_jwt_secret
 PORT=5000
 ```
 
-The client uses `NEXT_PUBLIC_API_URL` to point at the backend API URL. If not provided, it falls back to:
+If the project uses NeonDB, the database URL should be the Neon PostgreSQL connection string supplied by Neon. The client uses `NEXT_PUBLIC_API_URL` to point at the backend API URL. If not provided, it falls back to:
 
 ```text
 http://localhost:5000/api/v1
@@ -219,6 +256,7 @@ KrishiBazar/
 - The frontend uses environment configuration for API base URL selection.
 - Orders in the current server implementation are represented as in-memory demo data and are not yet persisted in Prisma.
 - Product creation is implemented in the Express product service and matches the current Prisma `Product` model fields.
+- Payment integration is UI-only: the page shows a bKash card and a Card card, but no actual bKash or bank card gateway flow is implemented.
 
 ## Roadmap & Future Directions
 
@@ -233,3 +271,4 @@ The project already has a strong base for the following extensions:
 ## Conclusion
 
 KrishiBazar is a full-stack agricultural marketplace concept that combines a Bangla-first user experience with a modern Next.js, Express, and Prisma architecture. It is structured to support full-personality role dashboards and direct farmer-to-buyer product workflows across a Bangladesh-focused supply chain experience.
+
